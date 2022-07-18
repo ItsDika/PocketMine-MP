@@ -230,42 +230,6 @@ class NetworkSession{
 		);
 	}
 
-	private function onPlayerCreated(Player $player) : void{
-		if(!$this->isConnected()){
-			//the remote player might have disconnected before spawn terrain generation was finished
-			return;
-		}
-		$this->player = $player;
-		if(!$this->server->addOnlinePlayer($player)){
-			return;
-		}
-
-		$this->invManager = new InventoryManager($this->player, $this);
-
-		$effectManager = $this->player->getEffects();
-		$effectManager->getEffectAddHooks()->add($effectAddHook = function(EffectInstance $effect, bool $replacesOldEffect) : void{
-			$this->onEntityEffectAdded($this->player, $effect, $replacesOldEffect);
-		});
-		$effectManager->getEffectRemoveHooks()->add($effectRemoveHook = function(EffectInstance $effect) : void{
-			$this->onEntityEffectRemoved($this->player, $effect);
-		});
-		$this->disposeHooks->add(static function() use ($effectManager, $effectAddHook, $effectRemoveHook) : void{
-			$effectManager->getEffectAddHooks()->remove($effectAddHook);
-			$effectManager->getEffectRemoveHooks()->remove($effectRemoveHook);
-		});
-
-		$permissionHooks = $this->player->getPermissionRecalculationCallbacks();
-		$permissionHooks->add($permHook = function() : void{
-			$this->logger->debug("Syncing available commands and abilities/permissions due to permission recalculation");
-			$this->syncAbilities($this->player);
-			$this->syncAvailableCommands();
-		});
-		$this->disposeHooks->add(static function() use ($permissionHooks, $permHook) : void{
-			$permissionHooks->remove($permHook);
-		});
-		$this->beginSpawnSequence();
-	}
-
 	public function getPlayer() : ?Player{
 		return $this->player;
 	}
