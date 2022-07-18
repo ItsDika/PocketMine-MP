@@ -30,9 +30,7 @@ class EnumTraitTest extends TestCase{
 	/**
 	 * @doesNotPerformAssertions
 	 */
-	public function testEnumLazyInit() : void{
-		foreach([TestEnum::ONE(), TestEnum::TWO(), TestEnum::THREE()] as $member){
-			//NOOP
-		}
-	}
+	public function testEnumLazyInit() : void
+ {
+ }
 }
