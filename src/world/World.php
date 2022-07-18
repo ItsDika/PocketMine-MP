@@ -2772,48 +2772,6 @@ class World implements ChunkManager{
 	}
 
 	/**
-	 * @phpstan-return Promise<Chunk>
-	 */
-	private function enqueuePopulationRequest(int $chunkX, int $chunkZ, ?ChunkLoader $associatedChunkLoader) : Promise{
-		$chunkHash = World::chunkHash($chunkX, $chunkZ);
-		$this->addChunkHashToPopulationRequestQueue($chunkHash);
-		$resolver = $this->chunkPopulationRequestMap[$chunkHash] = new PromiseResolver();
-		if($associatedChunkLoader === null){
-			$temporaryLoader = new class implements ChunkLoader{};
-			$this->registerChunkLoader($temporaryLoader, $chunkX, $chunkZ);
-			$resolver->getPromise()->onCompletion(
-				fn() => $this->unregisterChunkLoader($temporaryLoader, $chunkX, $chunkZ),
-				static function() : void{}
-			);
-		}
-		return $resolver->getPromise();
-	}
-
-	private function drainPopulationRequestQueue() : void{
-		$failed = [];
-		while(count($this->activeChunkPopulationTasks) < $this->maxConcurrentChunkPopulationTasks && !$this->chunkPopulationRequestQueue->isEmpty()){
-			$nextChunkHash = $this->chunkPopulationRequestQueue->dequeue();
-			unset($this->chunkPopulationRequestQueueIndex[$nextChunkHash]);
-			World::getXZ($nextChunkHash, $nextChunkX, $nextChunkZ);
-			if(isset($this->chunkPopulationRequestMap[$nextChunkHash])){
-				assert(!($this->activeChunkPopulationTasks[$nextChunkHash] ?? false), "Population for chunk $nextChunkX $nextChunkZ already running");
-				if(
-					!$this->orderChunkPopulation($nextChunkX, $nextChunkZ, null)->isResolved() &&
-					!isset($this->activeChunkPopulationTasks[$nextChunkHash])
-				){
-					$failed[] = $nextChunkHash;
-				}
-			}
-		}
-
-		//these requests failed even though they weren't rate limited; we can't directly re-add them to the back of the
-		//queue because it would result in an infinite loop
-		foreach($failed as $hash){
-			$this->addChunkHashToPopulationRequestQueue($hash);
-		}
-	}
-
-	/**
 	 * Attempts to initiate asynchronous generation/population of the target chunk, if it's currently reasonable to do
 	 * so (and if it isn't already generated/populated).
 	 * If the generator is busy, the request will be put into a queue and delayed until a better time.
