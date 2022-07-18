@@ -242,11 +242,6 @@ class World implements ChunkManager{
 	 * @phpstan-var \SplQueue<int>
 	 */
 	private \SplQueue $chunkPopulationRequestQueue;
-	/**
-	 * @var true[] chunkHash => dummy
-	 * @phpstan-var array<int, true>
-	 */
-	private array $chunkPopulationRequestQueueIndex = [];
 
 	/** @var bool[] */
 	private array $generatorRegisteredWorkers = [];
@@ -2761,55 +2756,6 @@ class World implements ChunkManager{
 
 		foreach($this->players as $player){
 			$player->getNetworkSession()->syncWorldDifficulty($this->getDifficulty());
-		}
-	}
-
-	private function addChunkHashToPopulationRequestQueue(int $chunkHash) : void{
-		if(!isset($this->chunkPopulationRequestQueueIndex[$chunkHash])){
-			$this->chunkPopulationRequestQueue->enqueue($chunkHash);
-			$this->chunkPopulationRequestQueueIndex[$chunkHash] = true;
-		}
-	}
-
-	/**
-	 * @phpstan-return Promise<Chunk>
-	 */
-	private function enqueuePopulationRequest(int $chunkX, int $chunkZ, ?ChunkLoader $associatedChunkLoader) : Promise{
-		$chunkHash = World::chunkHash($chunkX, $chunkZ);
-		$this->addChunkHashToPopulationRequestQueue($chunkHash);
-		$resolver = $this->chunkPopulationRequestMap[$chunkHash] = new PromiseResolver();
-		if($associatedChunkLoader === null){
-			$temporaryLoader = new class implements ChunkLoader{};
-			$this->registerChunkLoader($temporaryLoader, $chunkX, $chunkZ);
-			$resolver->getPromise()->onCompletion(
-				fn() => $this->unregisterChunkLoader($temporaryLoader, $chunkX, $chunkZ),
-				static function() : void{}
-			);
-		}
-		return $resolver->getPromise();
-	}
-
-	private function drainPopulationRequestQueue() : void{
-		$failed = [];
-		while(count($this->activeChunkPopulationTasks) < $this->maxConcurrentChunkPopulationTasks && !$this->chunkPopulationRequestQueue->isEmpty()){
-			$nextChunkHash = $this->chunkPopulationRequestQueue->dequeue();
-			unset($this->chunkPopulationRequestQueueIndex[$nextChunkHash]);
-			World::getXZ($nextChunkHash, $nextChunkX, $nextChunkZ);
-			if(isset($this->chunkPopulationRequestMap[$nextChunkHash])){
-				assert(!($this->activeChunkPopulationTasks[$nextChunkHash] ?? false), "Population for chunk $nextChunkX $nextChunkZ already running");
-				if(
-					!$this->orderChunkPopulation($nextChunkX, $nextChunkZ, null)->isResolved() &&
-					!isset($this->activeChunkPopulationTasks[$nextChunkHash])
-				){
-					$failed[] = $nextChunkHash;
-				}
-			}
-		}
-
-		//these requests failed even though they weren't rate limited; we can't directly re-add them to the back of the
-		//queue because it would result in an infinite loop
-		foreach($failed as $hash){
-			$this->addChunkHashToPopulationRequestQueue($hash);
 		}
 	}
 
