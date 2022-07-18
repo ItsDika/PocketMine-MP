@@ -242,11 +242,6 @@ class World implements ChunkManager{
 	 * @phpstan-var \SplQueue<int>
 	 */
 	private \SplQueue $chunkPopulationRequestQueue;
-	/**
-	 * @var true[] chunkHash => dummy
-	 * @phpstan-var array<int, true>
-	 */
-	private array $chunkPopulationRequestQueueIndex = [];
 
 	/** @var bool[] */
 	private array $generatorRegisteredWorkers = [];
