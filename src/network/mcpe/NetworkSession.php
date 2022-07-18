@@ -653,13 +653,6 @@ class NetworkSession{
 		}));
 	}
 
-	private function beginSpawnSequence() : void{
-		$this->setHandler(new PreSpawnPacketHandler($this->server, $this->player, $this, $this->invManager));
-		$this->player->setImmobile(); //TODO: HACK: fix client-side falling pre-spawn
-
-		$this->logger->debug("Waiting for chunk radius request");
-	}
-
 	public function notifyTerrainReady() : void{
 		$this->logger->debug("Sending spawn notification, waiting for spawn response");
 		$this->sendDataPacket(PlayStatusPacket::create(PlayStatusPacket::PLAYER_SPAWN));

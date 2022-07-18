@@ -34,15 +34,6 @@ use function file_get_contents;
 class StaticPacketCache{
 	use SingletonTrait;
 
-	/**
-	 * @phpstan-return CacheableNbt<\pocketmine\nbt\tag\CompoundTag>
-	 */
-	private static function loadCompoundFromFile(string $filePath) : CacheableNbt{
-		$rawNbt = @file_get_contents($filePath);
-		if($rawNbt === false) throw new \RuntimeException("Failed to read file");
-		return new CacheableNbt((new NetworkNbtSerializer())->read($rawNbt)->mustGetCompoundTag());
-	}
-
 	public function __construct(
 		private BiomeDefinitionListPacket $biomeDefs,
 		private AvailableActorIdentifiersPacket $availableActorIdentifiers
