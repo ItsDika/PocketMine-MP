@@ -39,13 +39,6 @@ final class ZlibCompressor implements Compressor{
 	public const DEFAULT_THRESHOLD = 256;
 	public const DEFAULT_MAX_DECOMPRESSION_SIZE = 2 * 1024 * 1024;
 
-	/**
-	 * @see SingletonTrait::make()
-	 */
-	private static function make() : self{
-		return new self(self::DEFAULT_LEVEL, self::DEFAULT_THRESHOLD, self::DEFAULT_MAX_DECOMPRESSION_SIZE);
-	}
-
 	public function __construct(
 		private int $level,
 		private int $minCompressionSize,

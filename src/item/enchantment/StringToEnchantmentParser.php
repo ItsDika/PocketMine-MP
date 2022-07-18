@@ -34,32 +34,6 @@ use pocketmine\utils\StringToTParser;
 final class StringToEnchantmentParser extends StringToTParser{
 	use SingletonTrait;
 
-	private static function make() : self{
-		$result = new self;
-
-		$result->register("blast_protection", fn() => VanillaEnchantments::BLAST_PROTECTION());
-		$result->register("efficiency", fn() => VanillaEnchantments::EFFICIENCY());
-		$result->register("feather_falling", fn() => VanillaEnchantments::FEATHER_FALLING());
-		$result->register("fire_aspect", fn() => VanillaEnchantments::FIRE_ASPECT());
-		$result->register("fire_protection", fn() => VanillaEnchantments::FIRE_PROTECTION());
-		$result->register("flame", fn() => VanillaEnchantments::FLAME());
-		$result->register("infinity", fn() => VanillaEnchantments::INFINITY());
-		$result->register("knockback", fn() => VanillaEnchantments::KNOCKBACK());
-		$result->register("mending", fn() => VanillaEnchantments::MENDING());
-		$result->register("power", fn() => VanillaEnchantments::POWER());
-		$result->register("projectile_protection", fn() => VanillaEnchantments::PROJECTILE_PROTECTION());
-		$result->register("protection", fn() => VanillaEnchantments::PROTECTION());
-		$result->register("punch", fn() => VanillaEnchantments::PUNCH());
-		$result->register("respiration", fn() => VanillaEnchantments::RESPIRATION());
-		$result->register("sharpness", fn() => VanillaEnchantments::SHARPNESS());
-		$result->register("silk_touch", fn() => VanillaEnchantments::SILK_TOUCH());
-		$result->register("thorns", fn() => VanillaEnchantments::THORNS());
-		$result->register("unbreaking", fn() => VanillaEnchantments::UNBREAKING());
-		$result->register("vanishing", fn() => VanillaEnchantments::VANISHING());
-
-		return $result;
-	}
-
 	public function parse(string $input) : ?Enchantment{
 		return parent::parse($input);
 	}

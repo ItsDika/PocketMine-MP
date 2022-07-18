@@ -48,13 +48,6 @@ final class RuntimeBlockMapping{
 	/** @var CompoundTag[] */
 	private array $bedrockKnownStates;
 
-	private static function make() : self{
-		return new self(
-			Path::join(\pocketmine\BEDROCK_DATA_PATH, "canonical_block_states.nbt"),
-			Path::join(\pocketmine\BEDROCK_DATA_PATH, "r12_to_current_block_map.bin")
-		);
-	}
-
 	public function __construct(string $canonicalBlockStatesFile, string $r12ToCurrentBlockMapFile){
 		$stream = PacketSerializer::decoder(
 			Utils::assumeNotFalse(file_get_contents($canonicalBlockStatesFile), "Missing required resource file"),

@@ -2814,33 +2814,6 @@ class World implements ChunkManager{
 	}
 
 	/**
-	 * Checks if a chunk needs to be populated, and whether it's ready to do so.
-	 * @return bool[]|PromiseResolver[]|null[]
-	 * @phpstan-return array{?PromiseResolver<Chunk>, bool}
-	 */
-	private function checkChunkPopulationPreconditions(int $chunkX, int $chunkZ) : array{
-		$chunkHash = World::chunkHash($chunkX, $chunkZ);
-		$resolver = $this->chunkPopulationRequestMap[$chunkHash] ?? null;
-		if($resolver !== null && isset($this->activeChunkPopulationTasks[$chunkHash])){
-			//generation is already running
-			return [$resolver, false];
-		}
-
-		$temporaryChunkLoader = new class implements ChunkLoader{};
-		$this->registerChunkLoader($temporaryChunkLoader, $chunkX, $chunkZ);
-		$chunk = $this->loadChunk($chunkX, $chunkZ);
-		$this->unregisterChunkLoader($temporaryChunkLoader, $chunkX, $chunkZ);
-		if($chunk !== null && $chunk->isPopulated()){
-			//chunk is already populated; return a pre-resolved promise that will directly fire callbacks assigned
-			$resolver ??= new PromiseResolver();
-			unset($this->chunkPopulationRequestMap[$chunkHash]);
-			$resolver->resolve($chunk);
-			return [$resolver, false];
-		}
-		return [$resolver, true];
-	}
-
-	/**
 	 * Attempts to initiate asynchronous generation/population of the target chunk, if it's currently reasonable to do
 	 * so (and if it isn't already generated/populated).
 	 * If the generator is busy, the request will be put into a queue and delayed until a better time.

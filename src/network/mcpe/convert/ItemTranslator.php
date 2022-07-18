@@ -66,57 +66,6 @@ final class ItemTranslator{
 	 */
 	private array $complexNetToCoreMapping = [];
 
-	private static function make() : self{
-		$data = Utils::assumeNotFalse(file_get_contents(Path::join(\pocketmine\BEDROCK_DATA_PATH, 'r16_to_current_item_map.json')), "Missing required resource file");
-		$json = json_decode($data, true);
-		if(!is_array($json) || !isset($json["simple"], $json["complex"]) || !is_array($json["simple"]) || !is_array($json["complex"])){
-			throw new AssumptionFailedError("Invalid item table format");
-		}
-
-		$legacyStringToIntMap = LegacyItemIdToStringIdMap::getInstance();
-
-		/** @phpstan-var array<string, int> $simpleMappings */
-		$simpleMappings = [];
-		foreach($json["simple"] as $oldId => $newId){
-			if(!is_string($oldId) || !is_string($newId)){
-				throw new AssumptionFailedError("Invalid item table format");
-			}
-			$intId = $legacyStringToIntMap->stringToLegacy($oldId);
-			if($intId === null){
-				//new item without a fixed legacy ID - we can't handle this right now
-				continue;
-			}
-			$simpleMappings[$newId] = $intId;
-		}
-		foreach(Utils::stringifyKeys($legacyStringToIntMap->getStringToLegacyMap()) as $stringId => $intId){
-			if(isset($simpleMappings[$stringId])){
-				throw new \UnexpectedValueException("Old ID $stringId collides with new ID");
-			}
-			$simpleMappings[$stringId] = $intId;
-		}
-
-		/** @phpstan-var array<string, array{int, int}> $complexMappings */
-		$complexMappings = [];
-		foreach($json["complex"] as $oldId => $map){
-			if(!is_string($oldId) || !is_array($map)){
-				throw new AssumptionFailedError("Invalid item table format");
-			}
-			foreach($map as $meta => $newId){
-				if(!is_numeric($meta) || !is_string($newId)){
-					throw new AssumptionFailedError("Invalid item table format");
-				}
-				$intId = $legacyStringToIntMap->stringToLegacy($oldId);
-				if($intId === null){
-					//new item without a fixed legacy ID - we can't handle this right now
-					continue;
-				}
-				$complexMappings[$newId] = [$intId, (int) $meta];
-			}
-		}
-
-		return new self(GlobalItemTypeDictionary::getInstance()->getDictionary(), $simpleMappings, $complexMappings);
-	}
-
 	/**
 	 * @param int[] $simpleMappings
 	 * @param int[][] $complexMappings

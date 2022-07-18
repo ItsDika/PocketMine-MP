@@ -50,22 +50,6 @@ use function trim;
 final class LegacyStringToItemParser{
 	use SingletonTrait;
 
-	private static function make() : self{
-		$result = new self(ItemFactory::getInstance());
-
-		$mappingsRaw = Utils::assumeNotFalse(@file_get_contents(Path::join(\pocketmine\RESOURCE_PATH, 'item_from_string_bc_map.json')), "Missing required resource file");
-
-		$mappings = json_decode($mappingsRaw, true);
-		if(!is_array($mappings)) throw new AssumptionFailedError("Invalid mappings format, expected array");
-
-		foreach($mappings as $name => $id){
-			if(!is_int($id)) throw new AssumptionFailedError("Invalid mappings format, expected int values");
-			$result->addMapping((string) $name, $id);
-		}
-
-		return $result;
-	}
-
 	/**
 	 * @var int[]
 	 * @phpstan-var array<string, int>
