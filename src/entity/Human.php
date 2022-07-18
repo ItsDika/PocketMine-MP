@@ -273,13 +273,6 @@ class Human extends Living implements ProjectileSource, InventoryHolder{
 			/** @var CompoundTag $item */
 			foreach($inventoryTag as $i => $item){
 				$slot = $item->getByte("Slot");
-				if($slot >= 0 && $slot < 9){ //Hotbar
-					//Old hotbar saving stuff, ignore it
-				}elseif($slot >= 100 && $slot < 104){ //Armor
-					$armorInventoryItems[$slot - 100] = Item::nbtDeserialize($item);
-				}elseif($slot >= 9 && $slot < $this->inventory->getSize() + 9){
-					$inventoryItems[$slot - 9] = Item::nbtDeserialize($item);
-				}
 			}
 
 			self::populateInventoryFromListTag($this->inventory, $inventoryItems);
