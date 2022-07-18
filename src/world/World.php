@@ -2764,13 +2764,6 @@ class World implements ChunkManager{
 		}
 	}
 
-	private function addChunkHashToPopulationRequestQueue(int $chunkHash) : void{
-		if(!isset($this->chunkPopulationRequestQueueIndex[$chunkHash])){
-			$this->chunkPopulationRequestQueue->enqueue($chunkHash);
-			$this->chunkPopulationRequestQueueIndex[$chunkHash] = true;
-		}
-	}
-
 	/**
 	 * Attempts to initiate asynchronous generation/population of the target chunk, if it's currently reasonable to do
 	 * so (and if it isn't already generated/populated).
