@@ -26,10 +26,10 @@ namespace pmmp\TesterPlugin;
 use function time;
 
 abstract class Test{
-	const RESULT_WAITING = -1;
-	const RESULT_OK = 0;
-	const RESULT_FAILED = 1;
-	const RESULT_ERROR = 2;
+	public const RESULT_WAITING = -1;
+	public const RESULT_OK = 0;
+	public const RESULT_FAILED = 1;
+	public const RESULT_ERROR = 2;
 
 	/** @var Main */
 	private $plugin;
